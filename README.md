@@ -42,13 +42,13 @@
 <details>
   <summary>other</summary>
   <p>Same steps apply to other plugin managers. Just make sure to add/run this build command:</p>
-  
+
   ```sh
   ./gradlew linkReleaseSharedNative --no-daemon --no-build-cache
   ```
 </details>
 
-## 🔧 Usage
+## 🔧 Configuration
 ```lua
 require('cord').setup({
   enable_timer = true,                           -- Enable timer for automatic presence updates
