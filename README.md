@@ -24,7 +24,7 @@
   ```lua
   {
     'reblast/cord.nvim',
-    build = './gradlew linkReleaseSharedNative --no-daemon --no-build-cache'
+    build = './gradlew clean linkReleaseSharedNative --no-daemon --no-build-cache'
   }
   ```
 
@@ -45,7 +45,7 @@
   ```lua
   {
     'reblast/cord.nvim',
-    run = './gradlew linkReleaseSharedNative --no-daemon --no-build-cache'
+    run = './gradlew clean linkReleaseSharedNative --no-daemon --no-build-cache'
   }
   ```
 </details>
@@ -55,7 +55,7 @@
   <p>Same steps apply to other plugin managers. Just make sure to add/run this build command:</p>
 
   ```sh
-  ./gradlew linkReleaseSharedNative --no-daemon --no-build-cache
+  ./gradlew clean linkReleaseSharedNative --no-daemon --no-build-cache
   ```
 </details>
 
