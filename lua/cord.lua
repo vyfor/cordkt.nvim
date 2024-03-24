@@ -1,5 +1,6 @@
 local cord = {}
 
+local ffi = require('ffi')
 local discord
 local repo
 
@@ -13,7 +14,6 @@ local function init()
     return stat and stat.type == 'file'
   end
 
-  local ffi = require('ffi')
   local path = debug.getinfo(2, 'S').source:sub(2, -14)
   local dll_path
   if is_windows() then
@@ -41,7 +41,7 @@ local function fetch_repository()
   local command = string.format('git -C %s config --get remote.origin.url', vim.fn.expand('%:p:h'))
   local handle = io.popen(command)
   if handle == nil then
-    vim.notify('Could not fetch Git repository URL', vim.log.levels.WARN)
+    vim.notify('[cord.nvim] Could not fetch Git repository URL', vim.log.levels.WARN)
     return
   end
   local git_url = handle:read('*a')
@@ -115,14 +115,18 @@ function cord.setup(userConfig)
         discord.set_cwd(find_workspace())
         if config.show_repository then
           local repo = fetch_repository()
-          discord.set_repository_url(repo)
+          if repo and repo ~= '' then
+            discord.set_repository_url(repo)
+          end
         end
         vim.api.nvim_create_autocmd('DirChanged', {
           callback = function()
             discord.set_cwd(find_workspace())
             if config.show_repository then
               local repo = fetch_repository()
-              discord.set_repository_url(repo)
+              if repo and repo ~= '' then
+                discord.set_repository_url(repo)
+              end
             end
           end
         })
@@ -146,7 +150,7 @@ function cord.setup(userConfig)
           end
           local err = discord.update_presence(current.name, current.type, current.readonly)
           if err ~= nil then
-            vim.api.nvim_err_writeln('[cord.nvim] Caught unexpected error: ' .. err)
+            vim.api.nvim_err_writeln('[cord.nvim] Caught unexpected error: ' .. ffi.string(err))
           end
           last = current
         end))
