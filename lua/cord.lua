@@ -25,13 +25,13 @@ local function init()
   local extension
   local dll_path
   if is_windows() then
-    extension = 'dll'
+    extension = '.dll'
   else
     dll_path = path .. '/build/bin/native/releaseShared/cord.so'
     if file_exists(dll_path) then
-      extension = 'so'
+      extension = '.so'
     else
-      extension = 'dylib'
+      extension = '.dylib'
     end
   end
 
