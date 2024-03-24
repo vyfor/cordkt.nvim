@@ -36,7 +36,9 @@ local function init()
   end
 
   dll_path = path .. '/cord' .. extension
-  move_file(path .. '/build/bin/native/releaseShared/cord' .. extension, dll_path)
+  if not file_exists(dll_path) then
+    move_file(path .. '/build/bin/native/releaseShared/cord' .. extension, dll_path)
+  end
 
   ffi.cdef[[
     const char* init(const char*, const char*, const char*, const char*, const char*, const char*, const char*, const char*);
