@@ -60,7 +60,7 @@ fun init(
 
   scope.launch {
     try {
-      client.connect()
+      client!!.connect()
     } catch (_: Exception) {}
   }
 
@@ -69,7 +69,7 @@ fun init(
 
 @CName("update_presence")
 fun updatePresence(filename: String, filetype: String, isReadOnly: Boolean) {
-  if (client == null || client.state != State.SENT_HANDSHAKE) return
+  if (client == null || client!!.state != State.SENT_HANDSHAKE) return
   scope.launch {
     try {
       var presenceDetails: String
@@ -83,14 +83,14 @@ fun updatePresence(filename: String, filetype: String, isReadOnly: Boolean) {
           presenceLargeText = "💤"
         }
         "netrw", "dirvish", "TelescopePrompt" -> {
-          val fileBrowser = fileBrowsers[filetype] ?: return@connect
+          val fileBrowser = fileBrowsers[filetype] ?: return@launch
 
           presenceDetails = fileBrowserText.replaceFirst("\$s", fileBrowser.second)
           presenceLargeImage = "$GITHUB_ASSETS_URL/file_browser/${fileBrowser.first}.png"
           presenceLargeText = fileBrowser.second
         }
         "lazy", "packer" -> {
-          val pluginManager = pluginManagers[filetype] ?: return@connect
+          val pluginManager = pluginManagers[filetype] ?: return@launch
 
           presenceDetails = pluginManagerText.replaceFirst("\$s", pluginManager.second)
           presenceLargeImage = "$GITHUB_ASSETS_URL/plugin_manager/${pluginManager.first}.png"
@@ -98,7 +98,7 @@ fun updatePresence(filename: String, filetype: String, isReadOnly: Boolean) {
         }
         else -> {
           if (filename.isBlank()) {
-            if (!filetype.isBlank()) return@connect
+            if (!filetype.isBlank()) return@launch
 
             presenceDetails =
                 (if (isReadOnly) viewingText else editingText).replaceFirst("\$s", "a new file")
@@ -115,7 +115,7 @@ fun updatePresence(filename: String, filetype: String, isReadOnly: Boolean) {
         }
       }
 
-      update(
+      client!!.update(
           Activity(
               details = presenceDetails,
               state =
