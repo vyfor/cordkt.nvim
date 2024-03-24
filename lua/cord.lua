@@ -14,20 +14,33 @@ local function init()
     return stat and stat.type == 'file'
   end
 
+  local function move_file(src, dest)
+    local result, err = os.rename(src, dest)
+    if not result then
+      vim.api.nvim_err_writeln('[cord.nvim] Error moving file: ' .. err)
+    end
+  end
+  
   local path = debug.getinfo(2, 'S').source:sub(2, -14)
+  local extension
   local dll_path
   if is_windows() then
-    dll_path = path .. '/build/bin/native/releaseShared/cord.dll'
+    extension = 'dll'
   else
     dll_path = path .. '/build/bin/native/releaseShared/cord.so'
-    if not file_exists(dll_path) then
-      dll_path = path .. '/build/bin/native/releaseShared/cord.dylib'
+    if file_exists(dll_path) then
+      extension = 'so'
+    else
+      extension = 'dylib'
     end
   end
 
+  dll_path = path .. '/cord' .. extension
+  move_file(path .. '/build/bin/native/releaseShared/cord' .. extension, dll_path)
+
   ffi.cdef[[
     const char* init(const char*, const char*, const char*, const char*, const char*, const char*, const char*, const char*);
-    const char* update_presence(const char*, const char*, bool);
+    void update_presence(const char*, const char*, bool);
     void disconnect();
     void set_cwd(const char*);
     void set_time();
@@ -108,7 +121,7 @@ function cord.setup(userConfig)
         config.workspace
       )
       if err ~= nil then
-        vim.api.nvim_err_writeln('[cord.nvim] Caught unexpected error: ' .. err)
+        vim.api.nvim_err_writeln('[cord.nvim] Caught unexpected error: ' .. ffi.string(err))
       end
 
       if config.workspace and config.workspace ~= '' and string.find(config.workspace, '$s') then
@@ -148,10 +161,7 @@ function cord.setup(userConfig)
           if last and current.name == last.name and current.type == last.type and current.readonly == last.readonly then
             return
           end
-          local err = discord.update_presence(current.name, current.type, current.readonly)
-          if err ~= nil then
-            vim.api.nvim_err_writeln('[cord.nvim] Caught unexpected error: ' .. ffi.string(err))
-          end
+          discord.update_presence(current.name, current.type, current.readonly)
           last = current
         end))
       end
