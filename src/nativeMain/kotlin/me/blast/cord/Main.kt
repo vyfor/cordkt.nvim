@@ -15,7 +15,8 @@ private var editor = "neovim"
 
 // Presence data
 private var cwd = ""
-private var presenceStartTime = epochMillis()
+private var presenceStartTime: Long? = null
+private var repositoryUrl: String? = null
 private lateinit var presenceSmallText: String
 private lateinit var idleText: String
 private lateinit var viewingText: String
@@ -107,21 +108,25 @@ fun updatePresence(filename: String, filetype: String, isReadOnly: Boolean): Str
       }
 
       update(
-          activity {
-            details = presenceDetails
-            if (cwd.isNotBlank() && workspaceText.isNotBlank()) {
-              state = workspaceText.replaceFirst("\$s", cwd)
-            }
-
-            assets {
-              largeImage = presenceLargeImage
-              largeText = presenceLargeText
-              smallImage = "$GITHUB_ASSETS_URL/editor/$editor.png"
-              smallText = presenceSmallText
-            }
-
-            timestamps { start = presenceStartTime }
-          }
+          Activity(
+              details = presenceDetails,
+              state =
+                  if (cwd.isNotBlank() && workspaceText.isNotBlank())
+                      workspaceText.replaceFirst("\$s", cwd)
+                  else null,
+              assets =
+                  ActivityAssets(
+                      largeImage = presenceLargeImage,
+                      largeText = presenceLargeText,
+                      smallImage = "$GITHUB_ASSETS_URL/editor/$editor.png",
+                      smallText = presenceSmallText
+                  ),
+              timestamps =
+                  if (presenceStartTime != null) ActivityTimestamps(start = presenceStartTime)
+                  else null,
+              buttons =
+                  repositoryUrl?.takeIf { url -> url.isNotBlank() }?.let { url -> arrayOf(ActivityButton("View Repository", url)) }
+          )
       )
     }
 
@@ -144,4 +149,14 @@ fun disconnect() {
 @CName("set_cwd")
 fun setCwd(value: String) {
   cwd = value
+}
+
+@CName("set_time")
+fun setTime() {
+  presenceStartTime = epochMillis()
+}
+
+@CName("set_repository_url")
+fun setRepositoryUrl(value: String) {
+  repositoryUrl = value
 }
