@@ -8,7 +8,6 @@ version = "0.1.0"
 
 repositories {
     mavenCentral()
-    mavenLocal()
 }
 kotlin {
     val hostOs = System.getProperty("os.name")
@@ -38,7 +37,7 @@ kotlin {
         nativeMain.dependencies {
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
-            implementation("io.github.reblast:kpresence:0.3.01")
+            implementation("io.github.reblast:kpresence:0.3.0")
         }
 
         all {
