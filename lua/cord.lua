@@ -23,7 +23,7 @@ local function init()
 
   local extension
   local os_name = get_os()
-  if os_name == 'Windows' then
+  if os_name:find('Windows', 1, true) == 1 then
     extension = '.dll'
   elseif os_name == 'Linux' then
     extension = '.so'
