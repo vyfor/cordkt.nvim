@@ -9,7 +9,8 @@
 - Highly [configurable](https://github.com/reblast/cord.nvim#configuration) in Lua
 - Offers a rich icon set for editors, languages, file browsers and plugin managers
 - Detects working directory based on VCS files
-- Written in native, leveraging Lua FFI.
+- Respects the ratelimit of one update per 15 seconds
+- Written in native code, uses Lua FFI for integration
 
 > \* Please note that the plugin has only been tested on Windows.
 
