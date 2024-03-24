@@ -5,8 +5,8 @@ local discord
 local repo
 
 local function init()
-  local function is_windows()
-    return package.config:sub(1, 1) == '\\'
+  local function get_os()
+    return vim.loop.os_uname().sysname
   end
 
   local function file_exists(filename)
@@ -20,24 +20,25 @@ local function init()
       vim.api.nvim_err_writeln('[cord.nvim] Error moving file: ' .. err)
     end
   end
-  
-  local path = debug.getinfo(2, 'S').source:sub(2, -14)
+
   local extension
-  local dll_path
-  if is_windows() then
+  local os_name = get_os()
+  if os_name == 'Windows' then
     extension = '.dll'
+  elseif os_name == 'Linux' then
+    extension = '.so'
+  elseif os_name == 'Darwin' then
+    extension = '.dylib'
   else
-    dll_path = path .. '/build/bin/native/releaseShared/cord.so'
-    if file_exists(dll_path) then
-      extension = '.so'
-    else
-      extension = '.dylib'
-    end
+    vim.api.nvim_err_writeln('[cord.nvim] Unable to identify OS type')
   end
 
-  dll_path = path .. '/cord' .. extension
-  if not file_exists(dll_path) then
-    move_file(path .. '/build/bin/native/releaseShared/cord' .. extension, dll_path)
+  local path = debug.getinfo(2, 'S').source:sub(2, -14)
+  local old_path = path .. '/build/bin/native/releaseShared/cord' .. extension
+  local new_path = path .. '/cord' .. extension
+  if file_exists(old_path) then
+    os.remove(new_path)
+    move_file(old_path, new_path)
   end
 
   ffi.cdef[[
@@ -49,7 +50,7 @@ local function init()
     void set_repository_url(const char*);
   ]]
 
-  discord = ffi.load(dll_path)
+  discord = ffi.load(new_path)
 end
 
 local function fetch_repository()
