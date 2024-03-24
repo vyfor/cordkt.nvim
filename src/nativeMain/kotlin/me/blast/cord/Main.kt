@@ -2,7 +2,7 @@
 
 package me.blast.cord
 
-import io.github.reblast.kpresence.RichClient
+import io.github.reblast.kpresence.*
 import io.github.reblast.kpresence.rpc.*
 import io.github.reblast.kpresence.utils.*
 import kotlinx.coroutines.*
@@ -10,6 +10,7 @@ import me.blast.cord.mappings.*
 
 private const val GITHUB_ASSETS_URL =
     "https://raw.githubusercontent.com/reblast/cord.nvim/master/assets"
+private val scope = CoroutineScope(Dispatchers.IO)
 private var client: RichClient? = null
 private var editor = "neovim"
 
@@ -36,34 +37,41 @@ fun init(
     _pluginManagerText: String,
     _workspaceText: String
 ): String? {
-  return try {
-    client =
-        when (_editor) {
-          "vim" -> RichClient(1219918645770059796)
-          "neovim" -> RichClient(1219918880005165137)
-          "lunarvim" -> RichClient(1220295374087000104)
-          "nvchad" -> RichClient(1220296082861326378)
-          else -> RichClient(_editor.toLong())
-        }.connect()
-    editor = _editor
-    presenceSmallText = _presenceSmallText
-    idleText = _idleText
-    viewingText = _viewingText
-    editingText = _editingText
-    fileBrowserText = _fileBrowserText
-    pluginManagerText = _pluginManagerText
-    workspaceText = _workspaceText
+  client =
+      when (_editor) {
+        "vim" -> RichClient(1219918645770059796)
+        "neovim" -> RichClient(1219918880005165137)
+        "lunarvim" -> RichClient(1220295374087000104)
+        "nvchad" -> RichClient(1220296082861326378)
+        else -> {
+          _editor.toLongOrNull()?.let { RichClient(it) }
+              ?: return "Passed invalid value to `editor`. Must be either one of the following: vim, neovim, lunarvim, nvchad or a valid client id."
+        }
+      }
 
-    null
-  } catch (e: Exception) {
-    e.message
+  editor = _editor
+  presenceSmallText = _presenceSmallText
+  idleText = _idleText
+  viewingText = _viewingText
+  editingText = _editingText
+  fileBrowserText = _fileBrowserText
+  pluginManagerText = _pluginManagerText
+  workspaceText = _workspaceText
+
+  scope.launch {
+    try {
+      client.connect()
+    } catch (_: Exception) {}
   }
+
+  return null
 }
 
 @CName("update_presence")
-fun updatePresence(filename: String, filetype: String, isReadOnly: Boolean): String? {
-  return try {
-    client?.connect {
+fun updatePresence(filename: String, filetype: String, isReadOnly: Boolean) {
+  if (client == null || client.state != State.SENT_HANDSHAKE) return
+  scope.launch {
+    try {
       var presenceDetails: String
       var presenceLargeImage: String
       var presenceLargeText: String
@@ -125,14 +133,12 @@ fun updatePresence(filename: String, filetype: String, isReadOnly: Boolean): Str
                   if (presenceStartTime != null) ActivityTimestamps(start = presenceStartTime)
                   else null,
               buttons =
-                  repositoryUrl?.takeIf { url -> url.isNotBlank() }?.let { url -> arrayOf(ActivityButton("View Repository", url)) }
+                  repositoryUrl?.takeIf { url -> url.isNotBlank() }?.let { url ->
+                    arrayOf(ActivityButton("View Repository", url))
+                  }
           )
       )
-    }
-
-    null
-  } catch (e: Exception) {
-    e.message
+    } catch (_: Exception) {}
   }
 }
 
