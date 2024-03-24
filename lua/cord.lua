@@ -94,7 +94,7 @@ function cord.setup(userConfig)
         vim.api.nvim_err_writeln('[cord.nvim] Caught unexpected error: ' .. err)
       end
 
-      if config.workspace ~= '' then
+      if config.workspace and config.workspace ~= '' and string.find(config.workspace, '$s') then
         discord.set_cwd(find_workspace())
         vim.api.nvim_create_autocmd('DirChanged', {
           callback = function()
