@@ -19,6 +19,7 @@
 ## 📦 Installation
 <details>
   <summary>lazy.nvim</summary>
+
   ```lua
   {
     'reblast/cord.nvim',
@@ -29,6 +30,7 @@
 
 <details>
   <summary>pckr.nvim</summary>
+
   ```lua
   {
     'reblast/cord.nvim',
@@ -40,6 +42,7 @@
 <details>
   <summary>other</summary>
   <p>Same steps apply to other plugin managers. Just make sure to add/run this build command:</p>
+  
   ```sh
   ./gradlew linkReleaseSharedNative --no-daemon --no-build-cache
   ```
