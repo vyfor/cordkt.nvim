@@ -27,6 +27,16 @@
     build = './gradlew linkReleaseSharedNative --no-daemon --no-build-cache'
   }
   ```
+
+  If the build fails with message `Process was killed because it reached the timeout`, try increasing the timeout in Lazy's configuration:
+  
+  ```lua
+  require('lazy').setup(..., {
+    git = {
+      timeout = 600
+    }
+  })
+  ```
 </details>
 
 <details>
