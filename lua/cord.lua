@@ -85,7 +85,7 @@ local function with_defaults(options)
     viewing = options.viewing or 'Viewing $s',
     editing = options.editing or 'Editing $s',
     file_browser = options.file_browser or 'Browsing files in $s',
-    plugin_manager = options.plugin_manager or 'Managing packages in $s',
+    plugin_manager = options.plugin_manager or 'Managing plugins in $s',
     workspace = options.workspace or 'In $s',
   }
 end
