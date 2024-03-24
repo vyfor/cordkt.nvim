@@ -1,0 +1,40 @@
+package me.blast.cord.mappings
+
+val languages =
+    mapOf(
+        "asm" to ("assembly" to "Assembly"),
+        "bash" to ("bash" to "Bash"),
+        "c" to ("c" to "C"),
+        "cpp" to ("cpp" to "C++"),
+        "csharp" to ("csharp" to "C#"),
+        "css" to ("css" to "CSS"),
+        "dart" to ("dart" to "Dart"),
+        "go" to ("go" to "Go"),
+        "haskell" to ("haskell" to "Haskell"),
+        "html" to ("html" to "HTML"),
+        "java" to ("java" to "Java"),
+        "javascript" to ("javascript" to "JavaScript"),
+        "javascriptreact" to ("react" to "JSX"),
+        "json" to ("json" to "JSON"),
+        "kotlin" to ("kotlin" to "Kotlin"),
+        "lua" to ("lua" to "Lua"),
+        "markdown" to ("markdown" to "Markdown"),
+        "perl" to ("perl" to "Perl"),
+        "php" to ("php" to "PHP"),
+        "ps1" to ("powershell" to "PowerShell"),
+        "python" to ("python" to "Python"),
+        "ruby" to ("ruby" to "Ruby"),
+        "rust" to ("rust" to "Rust"),
+        "scala" to ("scala" to "Scala"),
+        "sql" to ("sql" to "SQL"),
+        "swift" to ("swift" to "Swift"),
+        "txt" to ("text" to "Plain Text"),
+        "toml" to ("toml" to "TOML"),
+        "typescript" to ("typescript" to "TypeScript"),
+        "typescriptreact" to ("react" to "TSX"),
+        "vim" to ("vim" to "VimL"),
+        "xml" to ("xml" to "XML"),
+        "yaml" to ("yaml" to "YAML"),
+    )
+
+// value class Language
