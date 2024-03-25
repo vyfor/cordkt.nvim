@@ -83,7 +83,12 @@ fun init(
 }
 
 @CName("update_presence")
-fun updatePresence(filename: String, filetype: String, isReadOnly: Boolean): Boolean {
+fun updatePresence(
+    filename: String,
+    filetype: String,
+    isReadOnly: Boolean,
+    cursorPosition: String?
+): Boolean {
   if (richClient == null || richClient!!.state != State.SENT_HANDSHAKE) return false
   scope.launch {
     try {
@@ -130,6 +135,8 @@ fun updatePresence(filename: String, filetype: String, isReadOnly: Boolean): Boo
             presenceLargeImage = "$GITHUB_ASSETS_URL/language/${language.first}.png"
             presenceLargeText = language.second
           }
+
+          cursorPosition?.let { presenceDetails += ":$it" }
         }
       }
 
