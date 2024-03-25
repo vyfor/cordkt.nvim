@@ -94,7 +94,7 @@ local function start_timer(timer, config)
         return
       end
 
-      vim.api.nvim_create_autocmd('DiagnosticChanged', {
+      vim.api.nvim_create_autocmd('BufEnter', {
         callback = function()
           local bufnr
           if config.lsp.scope == 'buffer' then
