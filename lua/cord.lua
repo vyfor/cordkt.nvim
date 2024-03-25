@@ -88,23 +88,11 @@ local function start_timer(timer, config)
       })
     end
     if config.lsp.show_problem_count then
-      local severity = tonumber(config.lsp.severity)
-      if severity == nil or severity < 1 or severity > 4 then
+      config.lsp.severity = tonumber(config.lsp.severity)
+      if config.lsp.severity == nil or config.lsp.severity < 1 or config.lsp.severity > 4 then
         vim.api.nvim_err_writeln('[cord.nvim] LSP severity value must be a number between 1 and 4')
         return
       end
-
-      vim.api.nvim_create_autocmd({ 'DiagnosticChanged', 'BufEnter' }, {
-        callback = function()
-          local bufnr
-          if config.lsp.scope == 'buffer' then
-            bufnr = vim.api.nvim_get_current_buf()
-          elseif config.lsp.scope ~= 'workspace' then
-            vim.api.nvim_err_writeln('[cord.nvim] LSP scope value must be either workspace or buffer')
-          end
-          problem_count = #vim.diagnostic.get(bufnr, { severity = { min = severity } })
-        end
-      })
     end
   end
   timer:stop()
@@ -126,7 +114,17 @@ local function start_timer(timer, config)
 
     if config.display.show_time and config.timer.reset_on_change then
       discord.set_time()
-    end    
+    end
+
+    if config.lsp.show_problem_count then
+      local bufnr
+      if config.lsp.scope == 'buffer' then
+        bufnr = vim.api.nvim_get_current_buf()
+      elseif config.lsp.scope ~= 'workspace' then
+        vim.api.nvim_err_writeln('[cord.nvim] LSP scope value must be either workspace or buffer')
+      end
+      problem_count = #vim.diagnostic.get(bufnr, { severity = { min = config.lsp.severity } })
+    end
 
     local success = discord.update_presence(current_presence.name, current_presence.type, current_presence.readonly, current_presence.cursor, problem_count)
     enabled = true
