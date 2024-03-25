@@ -87,7 +87,8 @@ fun updatePresence(
     filename: String,
     filetype: String,
     isReadOnly: Boolean,
-    cursorPosition: String?
+    cursorPosition: String?,
+    problemCount: Int
 ): Boolean {
   if (richClient == null || richClient!!.state != State.SENT_HANDSHAKE) return false
   scope.launch {
@@ -146,7 +147,10 @@ fun updatePresence(
               state =
                   workspaceText
                       .takeIf { cwd.isNotBlank() && workspaceText.isNotBlank() }
-                      ?.replaceFirst("\$s", cwd),
+                      ?.replaceFirst("\$s", cwd)
+                      ?.let { str ->
+                        str + if (problemCount != -1) " - $problemCount problems" else ""
+                      },
               assets =
                   ActivityAssets(
                       largeImage = presenceLargeImage,
