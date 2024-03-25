@@ -106,16 +106,7 @@ local function start_timer(timer, config)
       local cursor = vim.api.nvim_win_get_cursor(0)
       cursor_position = cursor[1] .. ':' .. cursor[2]
     end
-
-    local current_presence = { name = vim.fn.expand('%:t'), type = vim.bo.filetype, readonly = vim.bo.readonly, cursor = cursor_position, problems = problem_count }
-    if last_presence and current_presence.cursor == last_presence.cursor and current_presence.problems == last_presence.problems and current_presence.name == last_presence.name and current_presence.type == last_presence.type and current_presence.readonly == last_presence.readonly then
-      return
-    end
-
-    if config.display.show_time and config.timer.reset_on_change then
-      discord.set_time()
-    end
-
+    
     if config.lsp.show_problem_count then
       local bufnr
       if config.lsp.scope == 'buffer' then
@@ -124,6 +115,15 @@ local function start_timer(timer, config)
         vim.api.nvim_err_writeln('[cord.nvim] LSP scope value must be either workspace or buffer')
       end
       problem_count = #vim.diagnostic.get(bufnr, { severity = { min = config.lsp.severity } })
+    end
+    
+    local current_presence = { name = vim.fn.expand('%:t'), type = vim.bo.filetype, readonly = vim.bo.readonly, cursor = cursor_position, problems = problem_count }
+    if last_presence and current_presence.cursor == last_presence.cursor and current_presence.problems == last_presence.problems and current_presence.name == last_presence.name and current_presence.type == last_presence.type and current_presence.readonly == last_presence.readonly then
+      return
+    end
+
+    if config.display.show_time and config.timer.reset_on_change then
+      discord.set_time()
     end
 
     local success = discord.update_presence(current_presence.name, current_presence.type, current_presence.readonly, current_presence.cursor, problem_count)
