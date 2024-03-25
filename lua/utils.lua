@@ -1,6 +1,4 @@
-local utils
-
-function utils.init(ffi)
+local function init(ffi)
   local function get_os()
     return vim.loop.os_uname().sysname
   end
@@ -50,7 +48,7 @@ function utils.init(ffi)
   return ffi.load(new_path)
 end
 
-function utils.fetch_repository()
+local function fetch_repository()
   local command = string.format('git -C %s config --get remote.origin.url', vim.fn.expand('%:p:h'))
   local handle = io.popen(command)
   if handle == nil then
@@ -63,7 +61,7 @@ function utils.fetch_repository()
   return git_url:gsub('^%s+', ''):gsub('%s+$', '')
 end
 
-function utils.find_workspace()
+local function find_workspace()
   local curr_dir = vim.fn.expand('%:p:h')
   local root_markers = {'.git', '.hg', '.svn'}
   local marker_path
@@ -83,4 +81,8 @@ function utils.find_workspace()
   return vim.fn.fnamemodify(vim.fn.getcwd(), ':t')
 end
 
-return utils
+return {
+  init = init,
+  fetch_repository = fetch_repository,
+  find_workspace = find_workspace
+}
