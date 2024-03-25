@@ -64,22 +64,43 @@
 ## 🔧 Configuration
 ```lua
 require('cord').setup({
-  enable_timer = true,                           -- Enable timer for automatic presence updates
-  timer_interval = 1500,                         -- Timer's update interval in milliseconds (min 500)
-  show_repository = false,                       -- Display 'View repository' button linked to repository url, if any
-  show_time = true,                              -- Display start timestamp
-  reset_time_on_change = true,                   -- Reset start timestamp on presence change
-  reset_time_on_idle = true,                     -- Reset start timestamp on idle
-  editor = 'neovim',                             -- (vim, neovim, lunarvim, nvchad or your application's client id)
-  description = 'The Superior Text Editor',      -- Text to display when hovering over the editor's image
-  idle = 'Idle',                                 -- Text to display when idle (empty string to disable)
-  viewing = 'Viewing $s',                        -- Text to display when viewing a readonly file
-  editing = 'Editing $s',                        -- Text to display when editing a file
-  file_browser = 'Browsing files in $s',         -- Text to display when browsing files
-  plugin_manager = 'Managing packages in $s',    -- Text to display when managing plugins
-  workspace = 'In $s',                           -- Text to display when in a workspace (empty string to disable)
+  usercmds = true,                               -- Enable user commands
+  timer = {
+    enable = true,                               -- Enable timer
+    interval = 1500,                             -- Timer's update interval in milliseconds (min 500)
+    reset_on_idle = false,                       -- Reset start timestamp on idle
+    reset_on_change = false,                     -- Reset start timestamp on presence change
+  },
+  editor = {
+    image = nil,                                 -- Image ID or URL in case a custom client id is provided
+    client = 'neovim',                           -- vim, neovim, lunarvim, nvchad or your application's client id
+    description = 'The Superior Text Editor',    -- Text to display when hovering over the editor's image
+  },
+  display = {
+    show_time = true,                            -- Display start timestamp
+    show_repository = true,                      -- Display 'View repository' button linked to repository url, if any
+  },
+  idle = {
+    enable = true,                               -- Enable idle status
+    text = 'Idle',                               -- Text to display when idle
+  },
+  text = {
+    viewing = 'Viewing $s',                      -- Text to display when viewing a readonly file
+    editing = 'Editing $s',                      -- Text to display when editing a file
+    file_browser = 'Browsing files in $s',       -- Text to display when browsing files (Empty string to disable)
+    plugin_manager = 'Managing plugins in $s',   -- Text to display when managing plugins (Empty string to disable)
+    workspace = 'In $s',                         -- Text to display when in a workspace (Empty string to disable)
+  }
 })
 ```
 
+### User commands
+- `:DiscordInit`     - Initialize presence client internally and connect to Discord
+- `:DiscordShow`     - Start presence timer
+- `:DiscordHide`     - Clear presence and stop timer
+- `:DiscordToggle`   - Toggle presence
+- `:DiscordRestart`  - Attempt to reconnect to Discord
+- `:DiscordShutdown` - Disconnect from Discord
+
 ## 🌱 Contributing
-This project is in beta. Feel free to open an issue or pull request for missing icons or features.
+This project is in beta. Feel free to open an issue or pull request for missing icons or features. You can also contact me on Discord **[poxuizm](https://discord.com/users/446729269872427018)** if you have any questions.
