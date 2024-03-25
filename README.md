@@ -84,10 +84,10 @@ require('cord').setup({
   lsp = {
     show_problem_count = false,                  -- Display number of diagnostics problems
     severity = 1,                                -- 1 = Error, 2 = Warning, 3 = Info, 4 = Hint
-    scope = 'buffer',                            -- buffer or workspace
+    scope = 'workspace',                         -- buffer or workspace
   }
   idle = {
-    enable = true,                               -- Enable idle status
+    show_idle = true,                            -- Enable idle status
     text = 'Idle',                               -- Text to display when idle
   },
   text = {
