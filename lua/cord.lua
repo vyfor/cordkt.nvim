@@ -91,7 +91,7 @@ local function start_timer(timer, config)
         callback = function(ev)
           local count = 0
           for _, diagnostic in ipairs(ev.data) do
-            if diagnostic.severity == 1 or (config.lsp.warnings_as_errors and diagnostic.severity == 2) then
+            if diagnostic.severity == 1 or (config.lsp.include_warnings and diagnostic.severity == 2) then
               count = count + 1
             end
           end
