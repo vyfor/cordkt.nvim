@@ -24,7 +24,7 @@ cord.config = {
   },
   lsp = {
     show_problem_count = false,
-    include_warnings = false,
+    severity = 1,
   },
   idle = {
     enable = true,
@@ -87,11 +87,17 @@ local function start_timer(timer, config)
       })
     end
     if config.lsp.show_problem_count then
+      local severity = tonumber(config.lsp.severity)
+      if severity == nil or severity < 1 or severity > 4 then
+        vim.api.nvim_err_writeln('[cord.nvim] LSP severity must be a number between 1 and 4')
+        return
+      end
+
       vim.api.nvim_create_autocmd('DiagnosticChanged', {
         callback = function(ev)
           local count = 0
           for _, diagnostic in ipairs(ev.data) do
-            if diagnostic.severity == 1 or (config.lsp.include_warnings and diagnostic.severity == 2) then
+            if diagnostic.severity <= severity then
               count = count + 1
             end
           end
