@@ -11,13 +11,13 @@ import me.blast.cord.mappings.*
 private const val GITHUB_ASSETS_URL =
     "https://raw.githubusercontent.com/reblast/cord.nvim/master/assets"
 private val scope = CoroutineScope(Dispatchers.IO)
-private var client: RichClient? = null
-private var editor = "neovim"
+private var richClient: RichClient? = null
 
 // Presence data
 private var cwd = ""
 private var presenceStartTime: Long? = null
 private var repositoryUrl: String? = null
+private var clientImage: String? = null
 private lateinit var presenceSmallText: String
 private lateinit var idleText: String
 private lateinit var viewingText: String
@@ -28,7 +28,8 @@ private lateinit var workspaceText: String
 
 @CName("init")
 fun init(
-    _editor: String,
+    _client: String,
+    _image: String?,
     _presenceSmallText: String,
     _idleText: String,
     _viewingText: String,
@@ -37,19 +38,33 @@ fun init(
     _pluginManagerText: String,
     _workspaceText: String
 ): String? {
-  client =
-      when (_editor) {
-        "vim" -> RichClient(1219918645770059796)
-        "neovim" -> RichClient(1219918880005165137)
-        "lunarvim" -> RichClient(1220295374087000104)
-        "nvchad" -> RichClient(1220296082861326378)
+  richClient =
+      when (_client) {
+        "vim" -> {
+          clientImage = "$GITHUB_ASSETS_URL/editor/vim.png"
+          RichClient(1219918645770059796)
+        }
+        "neovim" -> {
+          clientImage = "$GITHUB_ASSETS_URL/editor/neovim.png"
+          RichClient(1219918880005165137)
+        }
+        "lunarvim" -> {
+          clientImage = "$GITHUB_ASSETS_URL/editor/lunarvim.png"
+          RichClient(1220295374087000104)
+        }
+        "nvchad" -> {
+          clientImage = "$GITHUB_ASSETS_URL/editor/nvchad.png"
+          RichClient(1220296082861326378)
+        }
         else -> {
-          _editor.toLongOrNull()?.let { RichClient(it) }
-              ?: return "Passed invalid value to `editor`. Must be either one of the following: vim, neovim, lunarvim, nvchad or a valid client id."
+          _client.toLongOrNull()?.let {
+            clientImage = _image
+            RichClient(it)
+          }
+              ?: return "Passed invalid value to `client`. Must be one of: vim, neovim, lunarvim, nvchad, or a valid client id."
         }
       }
 
-  editor = _editor
   presenceSmallText = _presenceSmallText
   idleText = _idleText
   viewingText = _viewingText
@@ -60,7 +75,7 @@ fun init(
 
   scope.launch {
     try {
-      client!!.connect()
+      withTimeout(30000) { richClient!!.connect() }
     } catch (_: Exception) {}
   }
 
@@ -69,7 +84,7 @@ fun init(
 
 @CName("update_presence")
 fun updatePresence(filename: String, filetype: String, isReadOnly: Boolean) {
-  if (client == null || client!!.state != State.SENT_HANDSHAKE) return
+  if (richClient == null || richClient!!.state != State.SENT_HANDSHAKE) return
   scope.launch {
     try {
       var presenceDetails: String
@@ -77,12 +92,14 @@ fun updatePresence(filename: String, filetype: String, isReadOnly: Boolean) {
       var presenceLargeText: String
 
       when (filetype) {
-        "cord.idle" -> {
+        "Cord.idle" -> {
+          if (idleText.isBlank()) return@launch
           presenceDetails = idleText
           presenceLargeImage = "$GITHUB_ASSETS_URL/editor/idle.png"
           presenceLargeText = "💤"
         }
         "netrw", "dirvish", "TelescopePrompt" -> {
+          if (fileBrowserText.isBlank()) return@launch
           val fileBrowser = fileBrowsers[filetype] ?: return@launch
 
           presenceDetails = fileBrowserText.replaceFirst("\$s", fileBrowser.second)
@@ -90,6 +107,7 @@ fun updatePresence(filename: String, filetype: String, isReadOnly: Boolean) {
           presenceLargeText = fileBrowser.second
         }
         "lazy", "packer" -> {
+          if (pluginManagerText.isBlank()) return@launch
           val pluginManager = pluginManagers[filetype] ?: return@launch
 
           presenceDetails = pluginManagerText.replaceFirst("\$s", pluginManager.second)
@@ -115,23 +133,21 @@ fun updatePresence(filename: String, filetype: String, isReadOnly: Boolean) {
         }
       }
 
-      client!!.update(
+      richClient!!.update(
           Activity(
               details = presenceDetails,
               state =
-                  if (cwd.isNotBlank() && workspaceText.isNotBlank())
-                      workspaceText.replaceFirst("\$s", cwd)
-                  else null,
+                  workspaceText
+                      .takeIf { cwd.isNotBlank() && workspaceText.isNotBlank() }
+                      ?.replaceFirst("\$s", cwd),
               assets =
                   ActivityAssets(
                       largeImage = presenceLargeImage,
                       largeText = presenceLargeText,
-                      smallImage = "$GITHUB_ASSETS_URL/editor/$editor.png",
-                      smallText = presenceSmallText
+                      smallImage = clientImage,
+                      smallText = presenceSmallText.takeIf { clientImage != null }
                   ),
-              timestamps =
-                  if (presenceStartTime != null) ActivityTimestamps(start = presenceStartTime)
-                  else null,
+              timestamps = presenceStartTime?.let { ActivityTimestamps(start = it) },
               buttons =
                   repositoryUrl?.takeIf { url -> url.isNotBlank() }?.let { url ->
                     arrayOf(ActivityButton("View Repository", url))
@@ -142,13 +158,20 @@ fun updatePresence(filename: String, filetype: String, isReadOnly: Boolean) {
   }
 }
 
+@CName("clear_presence")
+fun clearPresence() {
+  presenceStartTime = null
+  try {
+    richClient?.clear()
+  } catch (_: Exception) {}
+}
+
 @CName("disconnect")
 fun disconnect() {
+  presenceStartTime = null
   try {
-    if (client != null) {
-      client!!.shutdown()
-      client = null
-    }
+    richClient?.shutdown()
+    richClient = null
   } catch (_: Exception) {}
 }
 
