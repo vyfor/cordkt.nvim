@@ -25,6 +25,7 @@ cord.config = {
   lsp = {
     show_problem_count = false,
     severity = 1,
+    scope = 'workspace',
   },
   idle = {
     enable = true,
@@ -89,20 +90,19 @@ local function start_timer(timer, config)
     if config.lsp.show_problem_count then
       local severity = tonumber(config.lsp.severity)
       if severity == nil or severity < 1 or severity > 4 then
-        vim.api.nvim_err_writeln('[cord.nvim] LSP severity must be a number between 1 and 4')
+        vim.api.nvim_err_writeln('[cord.nvim] LSP severity value must be a number between 1 and 4')
         return
       end
 
       vim.api.nvim_create_autocmd('DiagnosticChanged', {
-        callback = function(ev)
-          local count = 0
-          for _, diagnostic in ipairs(ev.data.diagnostics[1]) do
-            if diagnostic.severity <= severity then
-              count = count + 1
-            end
+        callback = function()
+          local bufnr
+          if config.lsp.scope == 'buffer' then
+            bufnr = vim.api.nvim_get_current_buf()
+          elseif config.lsp.scope ~= 'workspace' then
+            vim.api.nvim_err_writeln('[cord.nvim] LSP scope value must be either workspace or buffer')
           end
-
-          problem_count = count
+          problem_count = #vim.diagnostic.get(bufnr, { severity = { min = severity } })
         end
       })
     end
