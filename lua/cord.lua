@@ -42,7 +42,7 @@ local function init()
 
   ffi.cdef[[
     const char* init(const char*, const char*, const char*, const char*, const char*, const char*, const char*, const char*, const char*);
-    void update_presence(const char*, const char*, bool);
+    bool update_presence(const char*, const char*, bool);
     void clear_presence();
     void disconnect();
     void set_cwd(const char*);
@@ -179,9 +179,11 @@ local function start_timer(timer, config)
       discord.set_time()
     end
 
-    discord.update_presence(current_presence.name, current_presence.type, current_presence.readonly)
+    local success = discord.update_presence(current_presence.name, current_presence.type, current_presence.readonly)
     enabled = true
-    last_presence = current_presence
+    if success then 
+      last_presence = current_presence
+    end
   end))
 end
 

@@ -83,8 +83,8 @@ fun init(
 }
 
 @CName("update_presence")
-fun updatePresence(filename: String, filetype: String, isReadOnly: Boolean) {
-  if (richClient == null || richClient!!.state != State.SENT_HANDSHAKE) return
+fun updatePresence(filename: String, filetype: String, isReadOnly: Boolean): Boolean {
+  if (richClient == null || richClient!!.state != State.SENT_HANDSHAKE) return false
   scope.launch {
     try {
       var presenceDetails: String
@@ -156,6 +156,7 @@ fun updatePresence(filename: String, filetype: String, isReadOnly: Boolean) {
       )
     } catch (_: Exception) {}
   }
+  return true
 }
 
 @CName("clear_presence")
