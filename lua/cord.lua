@@ -22,6 +22,10 @@ cord.config = {
     show_repository = true,
     show_cursor_position = false,
   },
+  lsp = {
+    show_problem_count = false,
+    include_warnings = false,
+  },
   idle = {
     enable = true,
     text = 'Idle',
@@ -36,6 +40,7 @@ cord.config = {
 }
 local enabled = false
 local is_focused = true
+local problem_count = -1
 local last_presence
 local function start_timer(timer, config)
   if vim.g.cord_started == nil then
@@ -81,6 +86,20 @@ local function start_timer(timer, config)
         end
       })
     end
+    if config.lsp.show_problem_count then
+      vim.api.nvim_create_autocmd('DiagnosticChanged', {
+        callback = function(ev)
+          local count = 0
+          for _, diagnostic in ipairs(ev.data) do
+            if diagnostic.severity == 1 or (config.lsp.warnings_as_errors and diagnostic.severity == 2) then
+              count = count + 1
+            end
+          end
+
+          problem_count = count
+        end
+      })
+    end
   end
   timer:stop()
   timer:start(0, math.min(config.timer.interval, 500), vim.schedule_wrap(function()
@@ -94,8 +113,8 @@ local function start_timer(timer, config)
       cursor_position = cursor[1] .. ':' .. cursor[2]
     end
 
-    local current_presence = { name = vim.fn.expand('%:t'), type = vim.bo.filetype, readonly = vim.bo.readonly, cursor = cursor_position }
-    if last_presence and current_presence.cursor == last_presence.cursor and current_presence.name == last_presence.name and current_presence.type == last_presence.type and current_presence.readonly == last_presence.readonly then
+    local current_presence = { name = vim.fn.expand('%:t'), type = vim.bo.filetype, readonly = vim.bo.readonly, cursor = cursor_position, problems = problem_count }
+    if last_presence and current_presence.cursor == last_presence.cursor and current_presence.problems == last_presence.problems and current_presence.name == last_presence.name and current_presence.type == last_presence.type and current_presence.readonly == last_presence.readonly then
       return
     end
 
@@ -103,7 +122,7 @@ local function start_timer(timer, config)
       discord.set_time()
     end    
 
-    local success = discord.update_presence(current_presence.name, current_presence.type, current_presence.readonly, current_presence.cursor)
+    local success = discord.update_presence(current_presence.name, current_presence.type, current_presence.readonly, current_presence.cursor, current_presence.problems)
     enabled = true
     if success then
       last_presence = current_presence
