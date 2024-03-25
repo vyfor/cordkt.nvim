@@ -116,7 +116,7 @@ function cord.setup(userConfig)
     local timer = vim.loop.new_timer()
     local config = vim.tbl_deep_extend('force', cord.config, userConfig)
     local work = vim.loop.new_async(vim.schedule_wrap(function()
-      discord = utils.init()
+      discord = utils.init(ffi)
       local err = discord.init(
         config.editor.client,
         config.editor.image,
