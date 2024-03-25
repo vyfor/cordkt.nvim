@@ -83,7 +83,7 @@ require('cord').setup({
   },
   lsp = {
     show_problem_count = false,                  -- Display number of diagnostics problems
-    include_warnings = false,                    -- Include warnings in the problem count
+    severity = 1,                                -- 1 = Error, 2 = Warning, 3 = Info, 4 = Hint
   }
   idle = {
     enable = true,                               -- Enable idle status
