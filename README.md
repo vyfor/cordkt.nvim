@@ -79,7 +79,12 @@ require('cord').setup({
   display = {
     show_time = true,                            -- Display start timestamp
     show_repository = true,                      -- Display 'View repository' button linked to repository url, if any
+    show_cursor_position = true,                 -- Display line and column number of cursor's position
   },
+  lsp = {
+    show_problem_count = false,                  -- Display number of diagnostics problems
+    include_warnings = false,                    -- Include warnings in the problem count
+  }
   idle = {
     enable = true,                               -- Enable idle status
     text = 'Idle',                               -- Text to display when idle
