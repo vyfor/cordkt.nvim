@@ -1,7 +1,7 @@
 local cord = {}
 
 local ffi = require('ffi')
-local utils = require('lua.utils')
+local utils = require('utils')
 local discord
 
 cord.config = {
