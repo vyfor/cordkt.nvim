@@ -28,7 +28,7 @@ cord.config = {
     scope = 'workspace',
   },
   idle = {
-    enable = true,
+    show_idle = true,
     text = 'Idle',
   },
   text = {
@@ -69,7 +69,7 @@ local function start_timer(timer, config)
     if config.display.show_time then
       discord.set_time()
     end
-    if config.idle.enable then
+    if config.idle.show_idle then
       vim.api.nvim_create_autocmd('FocusGained', {
         callback = function()
           if config.display.show_time and config.timer.reset_on_idle then
