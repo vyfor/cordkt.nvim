@@ -96,7 +96,7 @@ local function start_timer(timer, config)
       vim.api.nvim_create_autocmd('DiagnosticChanged', {
         callback = function(ev)
           local count = 0
-          for _, diagnostic in ipairs(ev.data) do
+          for _, diagnostic in ipairs(ev.data.diagnostics[1]) do
             if diagnostic.severity <= severity then
               count = count + 1
             end
@@ -128,7 +128,7 @@ local function start_timer(timer, config)
       discord.set_time()
     end    
 
-    local success = discord.update_presence(current_presence.name, current_presence.type, current_presence.readonly, current_presence.cursor, current_presence.problems)
+    local success = discord.update_presence(current_presence.name, current_presence.type, current_presence.readonly, current_presence.cursor, problem_count)
     enabled = true
     if success then
       last_presence = current_presence
