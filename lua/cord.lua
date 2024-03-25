@@ -117,8 +117,8 @@ local config = {
 }
 
 local enabled = false
+local is_focused = true
 local last_presence
-local is_focused
 local function start_timer(timer, config)
   if vim.g.cord_started == nil then
     vim.g.cord_started = true
