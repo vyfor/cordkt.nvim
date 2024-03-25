@@ -94,7 +94,7 @@ require('cord').setup({
 })
 ```
 
-### User commands
+### ⌨️ User commands
 - `:DiscordInit`     - Initialize presence client internally and connect to Discord
 - `:DiscordShow`     - Start presence timer
 - `:DiscordHide`     - Clear presence and stop timer
