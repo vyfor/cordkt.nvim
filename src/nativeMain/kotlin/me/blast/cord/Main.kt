@@ -162,18 +162,21 @@ fun updatePresence(filename: String, filetype: String, isReadOnly: Boolean): Boo
 @CName("clear_presence")
 fun clearPresence() {
   presenceStartTime = null
-  try {
-    richClient?.clear()
-  } catch (_: Exception) {}
+  scope.launch {
+    try {
+      richClient?.clear()
+    } catch (_: Exception) {}
+  }
 }
 
 @CName("disconnect")
 fun disconnect() {
   presenceStartTime = null
-  try {
-    richClient?.shutdown()
-    richClient = null
-  } catch (_: Exception) {}
+  scope.launch {
+    try {
+      richClient?.shutdown()
+    } catch (_: Exception) {}
+  }
 }
 
 @CName("set_cwd")
