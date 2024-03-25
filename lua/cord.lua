@@ -88,22 +88,22 @@ local function start_timer(timer, config)
       return
     end
 
-    local current_presence = { name = vim.fn.expand('%:t'), type = vim.bo.filetype, readonly = vim.bo.readonly }
-    if last_presence and current_presence.name == last_presence.name and current_presence.type == last_presence.type and current_presence.readonly == last_presence.readonly then
-      return
-    end
-
-    if config.display.show_time and config.timer.reset_on_change then
-      discord.set_time()
-    end
-
     local cursor_position
     if config.display.show_cursor_position then
       local cursor = vim.api.nvim_win_get_cursor(0)
       cursor_position = cursor[1] .. ':' .. cursor[2]
     end
 
-    local success = discord.update_presence(current_presence.name, current_presence.type, current_presence.readonly, cursor_position)
+    local current_presence = { name = vim.fn.expand('%:t'), type = vim.bo.filetype, readonly = vim.bo.readonly, cursor = cursor_position }
+    if last_presence and current_presence.cursor == last_presence.cursor and current_presence.name == last_presence.name and current_presence.type == last_presence.type and current_presence.readonly == last_presence.readonly then
+      return
+    end
+
+    if config.display.show_time and config.timer.reset_on_change then
+      discord.set_time()
+    end    
+
+    local success = discord.update_presence(current_presence.name, current_presence.type, current_presence.readonly, current_presence.cursor)
     enabled = true
     if success then
       last_presence = current_presence
