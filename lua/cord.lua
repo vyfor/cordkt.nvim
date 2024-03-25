@@ -2,7 +2,6 @@ local cord = {}
 
 local ffi = require('ffi')
 local discord
-local repo
 
 local function init()
   local function get_os()
@@ -42,8 +41,9 @@ local function init()
   end
 
   ffi.cdef[[
-    const char* init(const char*, const char*, const char*, const char*, const char*, const char*, const char*, const char*);
+    const char* init(const char*, const char*, const char*, const char*, const char*, const char*, const char*, const char*, const char*);
     void update_presence(const char*, const char*, bool);
+    void clear_presence();
     void disconnect();
     void set_cwd(const char*);
     void set_time();
@@ -86,87 +86,128 @@ local function find_workspace()
   return vim.fn.fnamemodify(vim.fn.getcwd(), ':t')
 end
 
-local function with_defaults(options)
-  options = options or {}
-  return {
-    enable_timer = options.enable_timer or true,
-    timer_interval = options.timer_interval or 1500,
-    show_repository = options.show_repository or false,
-    show_time = options.show_time or true,
-    reset_time_on_change = options.reset_time_on_change or false,
-    reset_time_on_idle = options.reset_time_on_idle or false,
-    editor = options.editor or 'neovim',
-    description = options.description or 'The Superior Text Editor',
-    idle = options.idle or 'Idle',
-    viewing = options.viewing or 'Viewing $s',
-    editing = options.editing or 'Editing $s',
-    file_browser = options.file_browser or 'Browsing files in $s',
-    plugin_manager = options.plugin_manager or 'Managing plugins in $s',
-    workspace = options.workspace or 'In $s',
+local config = {
+  usercmds = true,
+  timer = {
+    enable = true,
+    interval = 1500,
+    reset_on_idle = false,
+    reset_on_change = false,
+  },
+  editor = {
+    image = nil,
+    client = 'neovim',
+    description = 'The Superior Text Editor',
+  },
+  display = {
+    show_time = true,
+    show_repository = true,
+  },
+  idle = {
+    enable = true,
+    text = 'Idle',
+  },
+  text = {
+    viewing = 'Viewing $s',
+    editing = 'Editing $s',
+    file_browser = 'Browsing files in $s',
+    plugin_manager = 'Managing plugins in $s',
+    workspace = 'In $s',
   }
+}
+
+local enabled = false
+local last_presence
+local is_focused
+local function start_timer(timer, config)
+  if vim.g.cord_started == nil then
+    vim.g.cord_started = true
+    if config.text.workspace ~= '' and string.find(config.text.workspace, '$s') then
+      discord.set_cwd(find_workspace())
+      if config.display.show_repository then
+        local repo = fetch_repository()
+        if repo and repo ~= '' then
+          discord.set_repository_url(repo)
+        end
+      end
+      vim.api.nvim_create_autocmd('DirChanged', {
+        callback = function()
+          discord.set_cwd(find_workspace())
+          if config.display.show_repository then
+            local repo = fetch_repository()
+            if repo and repo ~= '' then
+              discord.set_repository_url(repo)
+            end
+          end
+        end
+      })
+    end
+    if config.display.show_time then
+      discord.set_time()
+    end
+    if config.idle.enable then
+      vim.api.nvim_create_autocmd('FocusGained', {
+        callback = function()
+          if config.display.show_time and config.timer.reset_on_idle then
+            discord.set_time()
+          end
+          is_focused = true
+        end
+      })
+      
+      vim.api.nvim_create_autocmd('FocusLost', {
+        callback = function()
+          is_focused = false
+          last_presence = nil
+          discord.update_presence('', 'Cord.idle', false)
+        end
+      })
+    end
+  end
+  timer:stop()
+  timer:start(0, math.min(config.timer.interval, 500), vim.schedule_wrap(function()
+    if not is_focused then
+      return
+    end
+
+    local current_presence = { name = vim.fn.expand('%:t'), type = vim.bo.filetype, readonly = vim.bo.readonly }
+    if last_presence and current_presence.name == last_presence.name and current_presence.type == last_presence.type and current_presence.readonly == last_presence.readonly then
+      return
+    end
+
+    if config.display.show_time and config.timer.reset_on_change then
+      discord.set_time()
+    end
+
+    discord.update_presence(current_presence.name, current_presence.type, current_presence.readonly)
+    enabled = true
+    last_presence = current_presence
+  end))
 end
 
 function cord.setup(userConfig)
   if vim.g.cord_initialized == nil then
-    local config = with_defaults(userConfig)
-    local is_focused = true
-    local last
+    local timer = vim.loop.new_timer()
+    local config = vim.tbl_deep_extend('force', config, userConfig)
     local work = vim.loop.new_async(vim.schedule_wrap(function()
       init()
       local err = discord.init(
-        config.editor,
-        config.description,
-        config.idle,
-        config.viewing,
-        config.editing,
-        config.file_browser,
-        config.plugin_manager,
-        config.workspace
+        config.editor.client,
+        config.editor.image,
+        config.editor.description,
+        config.idle.text,
+        config.text.viewing,
+        config.text.editing,
+        config.text.file_browser,
+        config.text.plugin_manager,
+        config.text.workspace
       )
       if err ~= nil then
         vim.api.nvim_err_writeln('[cord.nvim] Caught unexpected error: ' .. ffi.string(err))
       end
 
-      if config.workspace and config.workspace ~= '' and string.find(config.workspace, '$s') then
-        discord.set_cwd(find_workspace())
-        if config.show_repository then
-          local repo = fetch_repository()
-          if repo and repo ~= '' then
-            discord.set_repository_url(repo)
-          end
-        end
-        vim.api.nvim_create_autocmd('DirChanged', {
-          callback = function()
-            discord.set_cwd(find_workspace())
-            if config.show_repository then
-              local repo = fetch_repository()
-              if repo and repo ~= '' then
-                discord.set_repository_url(repo)
-              end
-            end
-          end
-        })
-      end
-
-      if config.show_time then
-        discord.set_time()
-      end
-
-      if config.enable_timer then
-        last = { name = '', type = '', readonly = false }
-        local timer = vim.loop.new_timer()
-        timer:start(0, math.min(config.timer_interval, 500), vim.schedule_wrap(function()
-          if not is_focused then
-            return
-          end
-
-          local current = { name = vim.fn.expand('%:t'), type = vim.bo.filetype, readonly = vim.bo.readonly }
-          if last and current.name == last.name and current.type == last.type and current.readonly == last.readonly then
-            return
-          end
-          discord.update_presence(current.name, current.type, current.readonly)
-          last = current
-        end))
+      if config.timer.enable then
+        start_timer(timer, config)
       end
 
       vim.api.nvim_create_autocmd('ExitPre', {
@@ -174,24 +215,72 @@ function cord.setup(userConfig)
           discord.disconnect()
         end
       })
+
+      vim.api.nvim_create_user_command('DiscordInit', function()
+        local err = discord.init(
+          config.editor.client,
+          config.editor.image,
+          config.editor.description,
+          config.idle.text,
+          config.text.viewing,
+          config.text.editing,
+          config.text.file_browser,
+          config.text.plugin_manager,
+          config.text.workspace
+        )
+        if err ~= nil then
+          vim.api.nvim_err_writeln('[cord.nvim] Caught unexpected error: ' .. ffi.string(err))
+        end
+        start_timer(timer, config)
+      end, {})
+
+      if config.usercmds then
+        vim.api.nvim_create_user_command('DiscordShow', function()
+          start_timer(timer, config)
+        end, {})
+    
+        vim.api.nvim_create_user_command('DiscordRestart', function()
+          timer:stop()
+          discord.disconnect()
+          enabled = false
+          local err = discord.init(
+            config.editor.client,
+            config.editor.image,
+            config.editor.description,
+            config.idle.text,
+            config.text.viewing,
+            config.text.editing,
+            config.text.file_browser,
+            config.text.plugin_manager,
+            config.text.workspace
+          )
+          if err ~= nil then
+            vim.api.nvim_err_writeln('[cord.nvim] Caught unexpected error: ' .. ffi.string(err))
+          end
+          start_timer(timer, config)
+        end, {})
+    
+        vim.api.nvim_create_user_command('DiscordHide', function()
+          timer:stop()
+          enabled = false
+          discord.clear_presence()
+        end, {})
+    
+        vim.api.nvim_create_user_command('DiscordShutdown', function()
+          timer:stop()
+          enabled = false
+          discord.disconnect()
+        end, {})
   
-      if config.idle ~= '' then
-        vim.api.nvim_create_autocmd('FocusGained', {
-          callback = function()
-            if config.reset_time_on_idle then
-              discord.set_time()
-            end
-            is_focused = true
+        vim.api.nvim_create_user_command('DiscordToggle', function()
+          if enabled then
+            timer:stop()
+            enabled = false
+            discord.clear_presence()
+          else
+            start_timer(timer, config)
           end
-        })
-        
-        vim.api.nvim_create_autocmd('FocusLost', {
-          callback = function()
-            is_focused = false
-            last = nil
-            discord.update_presence('', 'cord.idle', false)
-          end
-        })
+        end, {})
       end
     end))
     work:send()
