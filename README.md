@@ -11,6 +11,8 @@
 - Highly [configurable](https://github.com/reblast/cord.nvim#configuration) in Lua
 - Offers a rich icon set for editors, languages, file browsers and plugin managers
 - Detects working directory based on VCS files
+- Detects problems across active buffers
+- Supports idling status when neovim is not in focus
 - Respects the ratelimit of one update per 15 seconds
 - Written in native code, uses Lua FFI for integration
 
