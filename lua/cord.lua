@@ -90,7 +90,7 @@ local function start_timer(timer, config)
     if config.lsp.show_problem_count then
       config.lsp.severity = tonumber(config.lsp.severity)
       if config.lsp.severity == nil or config.lsp.severity < 1 or config.lsp.severity > 4 then
-        vim.api.nvim_err_writeln('[cord.nvim] LSP severity value must be a number between 1 and 4')
+        vim.api.nvim_err_writeln('[cord.nvim] config.lsp.severity value must be a number between 1 and 4')
         return
       end
     end
@@ -112,7 +112,7 @@ local function start_timer(timer, config)
       if config.lsp.scope == 'buffer' then
         bufnr = vim.api.nvim_get_current_buf()
       elseif config.lsp.scope ~= 'workspace' then
-        vim.api.nvim_err_writeln('[cord.nvim] LSP scope value must be either workspace or buffer')
+        vim.api.nvim_err_writeln('[cord.nvim] config.lsp.scope value must be either workspace or buffer')
       end
       problem_count = #vim.diagnostic.get(bufnr, { severity = { min = config.lsp.severity } })
     end
