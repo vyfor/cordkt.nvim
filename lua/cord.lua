@@ -15,7 +15,7 @@ cord.config = {
   editor = {
     image = nil,
     client = 'neovim',
-    description = 'The Superior Text Editor',
+    tooltip = 'The Superior Text Editor',
   },
   display = {
     show_time = true,
