@@ -8,9 +8,9 @@
 - Lightweight
 - Cross-platform compatibility (Windows, Linux, macOS)*
 - Fast startup due to non-blocking, asynchronous nature
-- Highly [configurable](https://github.com/reblast/cord.nvim#configuration) in Lua
+- Highly [configurable](https://github.com/reblast/cord.nvim#-configuration) in Lua
 - Offers a rich icon set for editors, languages, file browsers and plugin managers
-- Detects working directory based on VCS files
+- Detects working directory based on VCS files as well as the git repository
 - Detects problems across active buffers
 - Supports idling status when neovim is not in focus
 - Respects the ratelimit of one update per 15 seconds
