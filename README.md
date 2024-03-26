@@ -1,6 +1,6 @@
 # 🧩 Cord
 
-![cord](https://github.com/reblast/cord.nvim/assets/92883017/bf551310-d073-40ea-abec-7db17b24f2aa)
+![cord_banner](https://github.com/reblast/cord.nvim/assets/92883017/d83f76d8-e6e3-4b39-86c4-398a5260cf6e)
 
 🚀 **Cord** is a Discord Rich Presence plugin designed for Neovim, written in Kotlin/Native.
 
