@@ -127,6 +127,9 @@ local function start_timer(timer, config)
               return
             end
             last_presence['idle'] = true
+            if config.display.show_time and config.timer.reset_on_idle then
+              discord.set_time()
+            end
             discord.update_presence('', 'Cord.idle', false, nil, 0)
             return
           end
