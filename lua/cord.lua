@@ -83,7 +83,7 @@ local function start_timer(timer, config)
         callback = function()
           is_focused = false
           last_presence = nil
-          discord.update_presence('', 'Cord.idle', false)
+          discord.update_presence('', 'Cord.idle', false, nil, 0)
         end
       })
     end
@@ -96,7 +96,7 @@ local function start_timer(timer, config)
     end
   end
   timer:stop()
-  timer:start(0, math.min(config.timer.interval, 500), vim.schedule_wrap(function()
+  timer:start(0, math.max(config.timer.interval, 500), vim.schedule_wrap(function()
     if not is_focused then
       return
     end
