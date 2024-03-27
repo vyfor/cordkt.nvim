@@ -9,10 +9,10 @@
 - Cross-platform compatibility (Windows, Linux, macOS)*
 - Fast startup due to non-blocking, asynchronous nature
 - Highly [configurable](https://github.com/reblast/cord.nvim#-configuration) in Lua
-- Offers a rich icon set for editors, languages, file browsers and plugin managers
-- Detects working directory based on VCS files as well as the git repository
-- Detects problems across active buffers
-- Supports configurable idling status
+- Offers a rich icon set for various components
+- Automatically detects working directory based on VCS files as well as the Git repository
+- Identifies problems across active buffers
+- Supports configurable idle status detection
 - Respects the ratelimit of one update per 15 seconds
 - Written in native code, uses Lua FFI for integration
 
