@@ -7,7 +7,7 @@
 ## 💎 Features
 - Lightweight
 - Cross-platform compatibility (Windows, Linux, macOS)*
-- Fast startup due to non-blocking, asynchronous nature
+- Blazingly fast startup due to non-blocking, asynchronous nature
 - Highly [configurable](https://github.com/reblast/cord.nvim#-configuration) in Lua
 - Offers a rich icon set for various components
 - Automatically detects working directory based on VCS files as well as the Git repository
@@ -106,12 +106,13 @@ require('cord').setup({
 ```
 
 ### ⌨️ User commands (WIP)
-- `:DiscordInit`     - Initialize presence client internally and connect to Discord
-- `:DiscordShow`     - Start presence timer
-- `:DiscordHide`     - Clear presence and stop timer
-- `:DiscordToggle`   - Toggle presence
-- `:DiscordRestart`  - Attempt to reconnect to Discord
-- `:DiscordShutdown` - Disconnect from Discord
+- `:CordConnect`        - Initialize presence client internally and connect to Discord
+- `:CordReconnect`      - Reconnect to Discord
+- `:CordDisconnect`     - Disconnect from Discord
+- `:CordTogglePresence` - Toggle presence
+- `:CordShowPresence`   - Show presence
+- `:CordHidePresence`   - Hide presence
 
 ## 🌱 Contributing
 This project is in beta. Feel free to open an issue or pull request for missing icons or features. You can also contact me on Discord **[poxuizm](https://discord.com/users/446729269872427018)** if you have any questions.
+
