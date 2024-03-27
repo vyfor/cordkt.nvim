@@ -29,9 +29,10 @@ cord.config = {
   },
   idle = {
     show_idle = true,
+    timeout = 300000,
+    disable_on_focus = true,
     text = 'Idle',
-    timeout = 15000,
-    disable_on_focus = false,
+    tooltip = '💤',
   },
   text = {
     viewing = 'Viewing $s',
@@ -39,7 +40,7 @@ cord.config = {
     file_browser = 'Browsing files in $s',
     plugin_manager = 'Managing plugins in $s',
     workspace = 'In $s',
-  }
+  },
 }
 
 local enabled = false
@@ -77,6 +78,7 @@ local function start_timer(timer, config)
       vim.api.nvim_create_autocmd('FocusGained', {
         callback = function()
           is_focused = true
+          last_presence = nil
         end
       })
 
@@ -96,47 +98,39 @@ local function start_timer(timer, config)
   end
   timer:stop()
   timer:start(0, config.timer.interval, vim.schedule_wrap(function()
-    local start = os.clock()
     local cursor = vim.api.nvim_win_get_cursor(0)
+    
+    if config.lsp.show_problem_count then
+      local bufnr
+      if config.lsp.scope == 'buffer' then
+        bufnr = vim.api.nvim_get_current_buf()
+      elseif config.lsp.scope ~= 'workspace' then
+        vim.api.nvim_err_writeln('[cord.nvim] config.lsp.scope value must be either workspace or buffer')
+      end
+      problem_count = #vim.diagnostic.get(bufnr, { severity = { min = config.lsp.severity } })
+    end
 
-    local current_presence = { name = vim.fn.expand('%:t'), type = vim.bo.filetype, readonly = vim.bo.readonly, cursor_line = cursor[1], cursor_col = cursor[2] }
-    if last_presence
-      and (last_presence.idle or (
-        current_presence.cursor_line == last_presence.cursor_line
-        and current_presence.cursor_col == last_presence.cursor_col
-        and current_presence.name == last_presence.name
-        and current_presence.type == last_presence.type
-        and current_presence.readonly == last_presence.readonly)) then
-          print(1)
-          if config.idle.show_idle and not last_presence.idle then
-            print(2)
-            if config.idle.timeout == 0 or (config.idle.timeout ~= -1 and (os.clock() - last_updated) * 1000 >= config.idle.timeout) then
-              print(3)
-              if config.idle.disable_on_focus and is_focused then
-                print(4)
-                return
-              end
-              last_presence = { idle = true }
-              local elapsed = os.clock() - start
-              print('[cord.nvim] time took to update idle presence: ' .. elapsed)
-              discord.update_presence('', 'Cord.idle', false, nil, 0)
-              return
-            end
-          end
-
-          if config.lsp.show_problem_count then
-            local bufnr
-            if config.lsp.scope == 'buffer' then
-              bufnr = vim.api.nvim_get_current_buf()
-            elseif config.lsp.scope ~= 'workspace' then
-              vim.api.nvim_err_writeln('[cord.nvim] config.lsp.scope value must be either workspace or buffer')
-            end
-            problem_count = #vim.diagnostic.get(bufnr, { severity = { min = config.lsp.severity } })
-          end
-
-          if last_presence and last_presence.problem_count == problem_count then
+    local current_presence = { name = vim.fn.expand('%:t'), type = vim.bo.filetype, readonly = vim.bo.readonly, cursor_line = cursor[1], cursor_col = cursor[2], problem_count = problem_count }
+    if last_presence and
+      current_presence.cursor_line == last_presence.cursor_line and
+      current_presence.cursor_col == last_presence.cursor_col and
+      current_presence.name == last_presence.name and
+      current_presence.type == last_presence.type and
+      current_presence.readonly == last_presence.readonly and
+      current_presence.problem_count == last_presence.problem_count then
+        if config.idle.show_idle then
+          if last_presence.idle then
             return
           end
+          if config.idle.timeout == 0 or (os.clock() - last_updated) * 1000 >= config.idle.timeout then
+            if config.idle.disable_on_focus and is_focused then
+              return
+            end
+            last_presence['idle'] = true
+            discord.update_presence('', 'Cord.idle', false, nil, 0)
+            return
+          end
+        end
     else
       last_updated = os.clock()
     end
@@ -155,8 +149,6 @@ local function start_timer(timer, config)
     if success then
       last_presence = current_presence
     end
-    local elapsed = os.clock() - start
-    print('[cord.nvim] time took to update regular presence: ' .. elapsed)
   end))
 end
 
@@ -164,7 +156,7 @@ function cord.setup(userConfig)
   if vim.g.cord_initialized == nil then
     local timer = vim.loop.new_timer()
     local config = vim.tbl_deep_extend('force', cord.config, userConfig)
-    config.timer.interval = math.max(config.timer.interval, 1000)
+    config.timer.interval = math.max(config.timer.interval, 500)
     local work = vim.loop.new_async(vim.schedule_wrap(function()
       discord = utils.init(ffi)
       local err = discord.init(
