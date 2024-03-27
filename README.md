@@ -7,7 +7,7 @@
 ## 💎 Features
 - Lightweight
 - Cross-platform compatibility (Windows, Linux, macOS)*
-- Fast startup due to non-blocking, asynchronous nature
+- Blazingly fast startup due to non-blocking, asynchronous nature
 - Highly [configurable](https://github.com/reblast/cord.nvim#-configuration) in Lua
 - Offers a rich icon set for various components
 - Automatically detects working directory based on VCS files as well as the Git repository
