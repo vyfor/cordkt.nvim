@@ -36,7 +36,7 @@ local function init(ffi)
   end
 
   ffi.cdef[[
-    const char* init(const char*, const char*, const char*, const char*, const char*, const char*, const char*, const char*, const char*);
+    const char* init(const char*, const char*, const char*, const char*, const char*, const char*, const char*, const char*, const char*, const char*);
     bool update_presence(const char*, const char*, bool, const char*, int);
     void clear_presence();
     void disconnect();

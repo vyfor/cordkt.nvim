@@ -18,8 +18,9 @@ private var cwd = ""
 private var presenceStartTime: Long? = null
 private var repositoryUrl: String? = null
 private var clientImage: String? = null
-private lateinit var presenceSmallText: String
+private lateinit var editorTooltip: String
 private lateinit var idleText: String
+private lateinit var idleTooltip: String
 private lateinit var viewingText: String
 private lateinit var editingText: String
 private lateinit var fileBrowserText: String
@@ -30,8 +31,9 @@ private lateinit var workspaceText: String
 fun init(
     _client: String,
     _image: String?,
-    _presenceSmallText: String,
+    _editorTooltip: String,
     _idleText: String,
+    _idle_tooltip: String,
     _viewingText: String,
     _editingText: String,
     _fileBrowserText: String,
@@ -65,8 +67,9 @@ fun init(
         }
       }
 
-  presenceSmallText = _presenceSmallText
+  editorTooltip = _editorTooltip
   idleText = _idleText
+  idleTooltip = _idle_tooltip
   viewingText = _viewingText
   editingText = _editingText
   fileBrowserText = _fileBrowserText
@@ -102,7 +105,7 @@ fun updatePresence(
           if (idleText.isBlank()) return@launch
           presenceDetails = idleText
           presenceLargeImage = "$GITHUB_ASSETS_URL/editor/idle.png"
-          presenceLargeText = "💤"
+          presenceLargeText = idleTooltip
         }
         "netrw", "dirvish", "TelescopePrompt" -> {
           if (fileBrowserText.isBlank()) return@launch
@@ -156,7 +159,7 @@ fun updatePresence(
                       largeImage = presenceLargeImage,
                       largeText = presenceLargeText,
                       smallImage = clientImage,
-                      smallText = presenceSmallText.takeIf { clientImage != null }
+                      smallText = editorTooltip.takeIf { clientImage != null }
                   ),
               timestamps = presenceStartTime?.let { ActivityTimestamps(start = it) },
               buttons =

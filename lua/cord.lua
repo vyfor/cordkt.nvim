@@ -29,7 +29,10 @@ cord.config = {
   },
   idle = {
     show_idle = true,
+    timeout = 300000,
+    disable_on_focus = true,
     text = 'Idle',
+    tooltip = '💤',
   },
   text = {
     viewing = 'Viewing $s',
@@ -37,11 +40,13 @@ cord.config = {
     file_browser = 'Browsing files in $s',
     plugin_manager = 'Managing plugins in $s',
     workspace = 'In $s',
-  }
+  },
 }
+
 local enabled = false
 local is_focused = true
 local problem_count = -1
+local last_updated = os.clock()
 local last_presence
 local function start_timer(timer, config)
   if vim.g.cord_started == nil then
@@ -69,21 +74,17 @@ local function start_timer(timer, config)
     if config.display.show_time then
       discord.set_time()
     end
-    if config.idle.show_idle then
+    if config.idle.show_idle and config.idle.disable_on_focus then
       vim.api.nvim_create_autocmd('FocusGained', {
         callback = function()
-          if config.display.show_time and config.timer.reset_on_idle then
-            discord.set_time()
-          end
           is_focused = true
+          last_presence = nil
         end
       })
 
       vim.api.nvim_create_autocmd('FocusLost', {
         callback = function()
           is_focused = false
-          last_presence = nil
-          discord.update_presence('', 'Cord.idle', false, nil, 0)
         end
       })
     end
@@ -96,16 +97,8 @@ local function start_timer(timer, config)
     end
   end
   timer:stop()
-  timer:start(0, math.max(config.timer.interval, 500), vim.schedule_wrap(function()
-    if not is_focused then
-      return
-    end
-
-    local cursor_position
-    if config.display.show_cursor_position then
-      local cursor = vim.api.nvim_win_get_cursor(0)
-      cursor_position = cursor[1] .. ':' .. cursor[2]
-    end
+  timer:start(0, config.timer.interval, vim.schedule_wrap(function()
+    local cursor = vim.api.nvim_win_get_cursor(0)
     
     if config.lsp.show_problem_count then
       local bufnr
@@ -116,17 +109,45 @@ local function start_timer(timer, config)
       end
       problem_count = #vim.diagnostic.get(bufnr, { severity = { min = config.lsp.severity } })
     end
-    
-    local current_presence = { name = vim.fn.expand('%:t'), type = vim.bo.filetype, readonly = vim.bo.readonly, cursor = cursor_position, problems = problem_count }
-    if last_presence and current_presence.cursor == last_presence.cursor and current_presence.problems == last_presence.problems and current_presence.name == last_presence.name and current_presence.type == last_presence.type and current_presence.readonly == last_presence.readonly then
-      return
-    end
 
+    local current_presence = { name = vim.fn.expand('%:t'), type = vim.bo.filetype, readonly = vim.bo.readonly, cursor_line = cursor[1], cursor_col = cursor[2], problem_count = problem_count }
+    if last_presence and
+      current_presence.cursor_line == last_presence.cursor_line and
+      current_presence.cursor_col == last_presence.cursor_col and
+      current_presence.name == last_presence.name and
+      current_presence.type == last_presence.type and
+      current_presence.readonly == last_presence.readonly and
+      current_presence.problem_count == last_presence.problem_count then
+        if config.idle.show_idle then
+          if last_presence.idle then
+            return
+          end
+          if config.idle.timeout == 0 or (os.clock() - last_updated) * 1000 >= config.idle.timeout then
+            if config.idle.disable_on_focus and is_focused then
+              return
+            end
+            last_presence['idle'] = true
+            if config.display.show_time and config.timer.reset_on_idle then
+              discord.set_time()
+            end
+            discord.update_presence('', 'Cord.idle', false, nil, 0)
+            return
+          end
+        end
+    else
+      last_updated = os.clock()
+    end
+    
     if config.display.show_time and config.timer.reset_on_change then
       discord.set_time()
     end
 
-    local success = discord.update_presence(current_presence.name, current_presence.type, current_presence.readonly, current_presence.cursor, problem_count)
+    local cursor_pos
+    if config.display.show_cursor_position then
+      cursor_pos = current_presence.cursor_line .. ':' .. current_presence.cursor_col
+    end
+
+    local success = discord.update_presence(current_presence.name, current_presence.type, current_presence.readonly, cursor_pos, problem_count)
     enabled = true
     if success then
       last_presence = current_presence
@@ -138,6 +159,7 @@ function cord.setup(userConfig)
   if vim.g.cord_initialized == nil then
     local timer = vim.loop.new_timer()
     local config = vim.tbl_deep_extend('force', cord.config, userConfig)
+    config.timer.interval = math.max(config.timer.interval, 500)
     local work = vim.loop.new_async(vim.schedule_wrap(function()
       discord = utils.init(ffi)
       local err = discord.init(
@@ -145,6 +167,7 @@ function cord.setup(userConfig)
         config.editor.image,
         config.editor.tooltip,
         config.idle.text,
+        config.idle.tooltip,
         config.text.viewing,
         config.text.editing,
         config.text.file_browser,
@@ -171,6 +194,7 @@ function cord.setup(userConfig)
           config.editor.image,
           config.editor.tooltip,
           config.idle.text,
+          config.idle.tooltip,
           config.text.viewing,
           config.text.editing,
           config.text.file_browser,
@@ -197,6 +221,7 @@ function cord.setup(userConfig)
             config.editor.image,
             config.editor.tooltip,
             config.idle.text,
+            config.idle.tooltip,
             config.text.viewing,
             config.text.editing,
             config.text.file_browser,
