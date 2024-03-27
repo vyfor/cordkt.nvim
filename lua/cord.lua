@@ -143,7 +143,7 @@ function cord.setup(userConfig)
       local err = discord.init(
         config.editor.client,
         config.editor.image,
-        config.editor.description,
+        config.editor.tooltip,
         config.idle.text,
         config.text.viewing,
         config.text.editing,
@@ -169,7 +169,7 @@ function cord.setup(userConfig)
         local error = discord.init(
           config.editor.client,
           config.editor.image,
-          config.editor.description,
+          config.editor.tooltip,
           config.idle.text,
           config.text.viewing,
           config.text.editing,
@@ -195,7 +195,7 @@ function cord.setup(userConfig)
           local error = discord.init(
             config.editor.client,
             config.editor.image,
-            config.editor.description,
+            config.editor.tooltip,
             config.idle.text,
             config.text.viewing,
             config.text.editing,
