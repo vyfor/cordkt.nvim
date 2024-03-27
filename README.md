@@ -1,6 +1,6 @@
 # 🧩 Cord
 
-![cord_banner](https://github.com/reblast/cord.nvim/assets/92883017/d83f76d8-e6e3-4b39-86c4-398a5260cf6e)
+![cord_banner](https://github.com/vyfor/cord.nvim/assets/92883017/d83f76d8-e6e3-4b39-86c4-398a5260cf6e)
 
 🚀 **Cord** is a Discord Rich Presence plugin designed for Neovim, written in Kotlin/Native.
 
@@ -8,7 +8,7 @@
 - Lightweight
 - Cross-platform compatibility (Windows, Linux, macOS)*
 - Blazingly fast startup due to non-blocking, asynchronous nature
-- Highly [configurable](https://github.com/reblast/cord.nvim#-configuration) in Lua
+- Highly [configurable](https://github.com/vyfor/cord.nvim#-configuration) in Lua
 - Offers a rich icon set for various components
 - Automatically detects working directory based on VCS files as well as the Git repository
 - Identifies problems across active buffers
@@ -27,7 +27,7 @@
 
   ```lua
   {
-    'reblast/cord.nvim',
+    'vyfor/cord.nvim',
     build = './gradlew linkReleaseSharedNative --no-daemon --no-build-cache'
   }
   ```
@@ -48,7 +48,7 @@
 
   ```lua
   {
-    'reblast/cord.nvim',
+    'vyfor/cord.nvim',
     run = './gradlew linkReleaseSharedNative --no-daemon --no-build-cache'
   }
   ```
