@@ -111,7 +111,6 @@ local function update_presence(config)
     local success = discord.update_presence(current_presence.name, current_presence.type, current_presence.readonly, cursor_pos, problem_count)
     if success then
       last_presence = current_presence
-      print('Updated presence to ' .. current_presence.name .. ' with ' .. current_presence.type)
     end
   elseif not update_idle_presence(config) then
     return
@@ -122,7 +121,7 @@ local function start_timer(config)
   if vim.g.cord_started == nil then
     vim.g.cord_started = true
     if not utils.validate_severity(config) then return end
-    utils.update_workspace_and_repo(config, discord)
+    utils.update_cwd(config, discord)
     cord.setup_autocmds(config)
     if config.display.show_time then
       discord.set_time()
@@ -149,7 +148,7 @@ function cord.setup(userConfig)
       end
 
       vim.api.nvim_create_autocmd('ExitPre', { callback = function() discord.disconnect() end })
-      if config.usercmds then utils.setup_usercmds(config) end
+      if config.usercmds then cord.setup_usercmds(config) end
     end))
     work:send()
     vim.g.cord_initialized = true
