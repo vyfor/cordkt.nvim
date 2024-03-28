@@ -133,7 +133,7 @@ end
 
 function cord.setup(userConfig)
   if vim.g.cord_initialized == nil then
-    local config = vim.tbl_deep_extend('force', cord.config, userConfig)
+    local config = vim.tbl_deep_extend('force', cord.config, userConfig or {})
     config.timer.interval = math.max(config.timer.interval, 500)
 
     local work = vim.loop.new_async(vim.schedule_wrap(function()
