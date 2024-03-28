@@ -92,7 +92,7 @@ end
 
 local function update_presence(config)
   local cursor = vim.api.nvim_win_get_cursor(0)
-  problem_count = utils.get_problem_count(config)
+  problem_count = utils.get_problem_count(config) or -1
   local current_presence = {
     name = vim.fn.expand('%:t'),
     type = vim.bo.filetype,
