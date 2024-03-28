@@ -11,21 +11,21 @@ local function move_file(src, dest)
 end
 
 local function init_discord(ffi)
-  local extension
+  local cord_file
   local os_name = vim.loop.os_uname().sysname
   if os_name:find('Windows', 1, true) == 1 then -- starts with 'Windows'
-    extension = '.dll'
+    cord_file = '/cord.dll'
   elseif os_name == 'Linux' then
-    extension = '.so'
+    cord_file = '/libcord.so'
   elseif os_name == 'Darwin' then
-    extension = '.dylib'
+    cord_file = '/libcord.dylib'
   else
     vim.api.nvim_err_writeln('[cord.nvim] Unable to identify OS type')
   end
 
   local path = debug.getinfo(2, 'S').source:sub(2, -14)
-  local old_path = path .. '/build/bin/native/releaseShared/cord' .. extension
-  local new_path = path .. '/cord' .. extension
+  local old_path = path .. '/build/bin/native/releaseShared/cord' .. cord_file
+  local new_path = path .. cord_file
   if file_exists(old_path) then
     os.remove(new_path)
     move_file(old_path, new_path) -- move file as to avoid file access errors when updating
