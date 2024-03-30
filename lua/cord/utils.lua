@@ -24,7 +24,7 @@ local function init_discord(ffi)
   end
 
   local path = debug.getinfo(2, 'S').source:sub(2, -14)
-  local old_path = path .. '/build/bin/native/releaseShared/cord' .. cord_file
+  local old_path = path .. '/build/bin/native/releaseShared' .. cord_file
   local new_path = path .. cord_file
   if file_exists(old_path) then
     os.remove(new_path)
