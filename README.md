@@ -6,7 +6,7 @@
 
 ## 💎 Features
 - Lightweight
-- Cross-platform compatibility (Windows, Linux, macOS)*
+- Cross-platform compatibility (Windows, Linux, macOS)
 - Blazingly fast startup due to non-blocking, asynchronous nature
 - Highly [configurable](https://github.com/vyfor/cord.nvim#-configuration) in Lua
 - Offers a rich icon set for various components
@@ -15,8 +15,6 @@
 - Supports configurable idle status detection
 - Respects the ratelimit of one update per 15 seconds
 - Written in native code, uses Lua FFI for integration
-
-> \* Please note that the plugin has only been tested on Windows.
 
 ## 🔌 Requirements
 - Neovim compiled with LuaJIT
