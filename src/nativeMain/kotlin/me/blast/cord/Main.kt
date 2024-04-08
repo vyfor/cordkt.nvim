@@ -9,7 +9,7 @@ import kotlinx.coroutines.*
 import me.blast.cord.mappings.*
 
 private const val GITHUB_ASSETS_URL =
-    "https://raw.githubusercontent.com/reblast/cord.nvim/master/assets"
+    "https://raw.githubusercontent.com/vyfor/cord.nvim/master/assets"
 private val scope = CoroutineScope(Dispatchers.IO)
 private var richClient: RichClient? = null
 
