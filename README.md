@@ -1,3 +1,6 @@
+> [!WARNING]
+> # This project has been rewritten in Rust, and now resides [here](https://github.com/vyfor/cord.nvim).
+
 # 🧩 Cord
 
 ![cord_banner](https://github.com/vyfor/cord.nvim/assets/92883017/d83f76d8-e6e3-4b39-86c4-398a5260cf6e)
